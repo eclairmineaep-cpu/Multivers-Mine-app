@@ -10,6 +10,13 @@ jobs:
       - name: Recuperer le code
         uses: actions/checkout@v4
 
+      # --- CORRECTION : INSTALLATION DE WINE POUR WINDOWS ---
+      - name: Installer Wine pour la compilation Windows
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y wine64
+
       # --- FABRICATION WINDOWS ---
       - name: Creer le fichier PC (.exe)
         run: |
