@@ -10,7 +10,14 @@ jobs:
       - name: Recuperer le code
         uses: actions/checkout@v4
 
-      # --- CORRECTION : INSTALLATION DE WINE POUR WINDOWS ---
+      # --- CONFIGURATION DE JAVA POUR ANDROID ---
+      - name: Configurer Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # --- INSTALLATION DE WINE POUR WINDOWS ---
       - name: Installer Wine pour la compilation Windows
         run: |
           sudo dpkg --add-architecture i386
@@ -20,10 +27,13 @@ jobs:
       # --- FABRICATION WINDOWS ---
       - name: Creer le fichier PC (.exe)
         run: |
-          mkdir win-app && cd win-app
+          mkdir win-app
+          cp index.html win-app/ || true
+          cp script.js win-app/ || true
+          cp style.css win-app/ || true
+          cd win-app
           npm init -y
           npm install electron electron-builder --save-dev
-          cp -r ../* . || true
           echo "const { app, BrowserWindow } = require('electron'); app.whenReady().then(() => { const win = new BrowserWindow({ width: 1200, height: 800, autoHideMenuBar: true }); win.loadFile('index.html'); });" > main.js
           echo '{"name": "app", "version": "1.0.0", "main": "main.js", "scripts": { "build": "electron-builder --win nsis" }, "build": { "appId": "com.app.id", "win": { "target": "nsis" }, "files": ["**/*"] }}' > package.json
           npm run build
@@ -32,7 +42,9 @@ jobs:
       - name: Creer le fichier Mobile (.apk)
         run: |
           mkdir android-app && cd android-app && mkdir www
-          cp -r ../* www/ || true
+          cp ../index.html www/ || true
+          cp ../script.js www/ || true
+          cp ../style.css www/ || true
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android
           npx cap init MonApp com.app.id --web-dir=www
